@@ -107,6 +107,7 @@
 #include "NestingLevelIncrementer.h"
 #include "NodeFilter.h"
 #include "NodeIterator.h"
+#include "NodeRareData.h"
 #include "NodeWithIndex.h"
 #include "OverflowEvent.h"
 #include "Page.h"
@@ -421,6 +422,7 @@ Document::Document(Frame* frame, const KURL& url, bool isXHTML, bool isHTML)
     , m_sawElementsInKnownNamespaces(false)
     , m_usingGeolocation(false)
     , m_eventQueue(EventQueue::create(this))
+    , m_documentRareData(0)
 #if ENABLE(WML)
     , m_containsWMLContent(false)
 #endif
@@ -567,6 +569,13 @@ Document::~Document()
 
     if (m_implementation)
         m_implementation->ownerDocumentDestroyed();
+
+    if (hasRareData()) {
+        ASSERT(m_documentRareData);
+        delete m_documentRareData;
+        m_documentRareData = 0;
+        clearFlag(HasRareDataFlag);
+    }
 }
 
 void Document::removedLastRef()
